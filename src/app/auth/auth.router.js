@@ -2,7 +2,7 @@ const router=require("express").Router()
 const authCtrl=require("./auth.controller")
 const uploader=require("../../middlewares/uploader.middleware")
 const ValidateRequest=require("../../middlewares/validate-request.middleware")
-const {registerSchema,passwordSchema} = require("./auth.validator")
+const {registerSchema,passwordSchema,loginSchema} = require("./auth.validator")
 
 const dirSetup=(req,res,next)=>{
     req.uploadDir="./public/uploads/user";
@@ -16,7 +16,8 @@ router.post('/register',dirSetup,uploader.single('image'),ValidateRequest(regist
 router.get('/verify-token/:token',authCtrl.verifyToken)
 router.post("/set-password/:token",ValidateRequest(passwordSchema),authCtrl.setPass)
 
-router.post("/login",authCtrl.setLogin)
+router.get("/refresh-token", (req, res, next) => {}, (req, res, next) => {})
+router.post("/login",ValidateRequest(loginSchema),authCtrl.setLogin)
 
 router.get('/forget-password',authCtrl.forgetPswd)
 router.get('/me',authCtrl.checkMe,(req,res,next)=>{})

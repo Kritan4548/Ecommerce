@@ -6,7 +6,9 @@ const {generateRandomString}=require("../../config/helpers");
 const mailSvc=require("../../services/mail.service");
 const authSvc=require('./auth.services');
 const bcrypt=require("bcryptjs")
-const jwt=require("jsonwebtoken")
+const jwt=require("jsonwebtoken");
+const { MongoClient } = require("mongodb");
+
 class AuthController {
     register = async (req, res, next) => {
 
@@ -34,8 +36,17 @@ class AuthController {
             payload.status="inactive"
             payload.token=generateRandomString();
 //TODO DB STORE
-//let mailMsg=authSvc.registerEmailMessage(payload.name,payload.token)
-// const mailAck=await mailSvc.emailSend(
+const client=await MongoClient.connect("mongodb://127.0.0.1:27017/");
+//const conn=client.connect()
+const db=client.db("api-24")
+
+
+//query
+let response=await db.collection('users').insertOne(payload)
+
+
+// let mailMsg=authSvc.registerEmailMessage(payload.name,payload.token)
+// await mailSvc.emailSend(
 //     payload.email,
 //     "Activate your account!",
 //     mailMsg
@@ -45,7 +56,9 @@ class AuthController {
         
 
             res.json({
-                result: payload
+                result: response,
+                msg:"User register succesful",
+                meta:null
             })
         } catch (except) {
             next(except)//goes to express.config error handler
@@ -104,19 +117,28 @@ class AuthController {
     }
 
 
-        verifyToken = (req, res, next) => {
+        verifyToken = async (req, res, next) => {
             try {
                 let token = req.params.token;
                 // TODO: DB Query DB
-                if(token) {
+                let client=await MongoClient.connect("mongodb://127.0.0.1:27017")
+                const db=client.db('api-24')
+
+
+                //query
+                let userDetail=await db.collection('users').findOne({
+                    token:token
+                })
+                if(userDetail){
                     res.json({
-                        result: {},
-                        msg: "Valid token",
-                        meta: null
+                        result:userDetail,
+                        msg:"token verified",
+                        meta:null
                     })
-                } else {
-                    next({code: 400, message: "Invalid or expired token"})
+                }else{
+                    next({code:400,message:"Token does not exists",result:{token}})
                 }
+              
             } catch(excep) {
                 next(excep)
             } 

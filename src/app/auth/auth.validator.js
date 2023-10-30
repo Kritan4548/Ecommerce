@@ -11,8 +11,12 @@ const passwordSchema = z.object({
     confirmPassword: z.string()
 })
 .refine((data) => data.password === data.confirmPassword, {
-    message: "Password and confirm Password does not match",
+    message:"Password and confirm Password does not match",
     path: ["confirmPassword"]
 })
+const loginSchema=z.object({
+    email:z.string().email().email(1),
+    password:z.string().min(8)
+})
 
-module.exports={registerSchema,passwordSchema};
+module.exports={registerSchema,passwordSchema,loginSchema};

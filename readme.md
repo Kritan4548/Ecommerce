@@ -72,3 +72,21 @@ Register ===> Url FE ====== Activation token =====> Email
     Login API ======= username, password ========> Login (jwt token)
     loggedin profileGet  ===== jwt token ====> Verify =====> Access 
 
+NoSql
+Mongodb
+couchDb
+
+local setup
+    -laptop
+cloud setup
+    -atlas server
+
+-Mongodb Server
+-Mongodb 
+
+to run mongoDb server
+mongosh
+
+
+
+
