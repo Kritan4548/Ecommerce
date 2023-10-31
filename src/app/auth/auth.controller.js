@@ -8,6 +8,7 @@ const authSvc=require('./auth.services');
 const bcrypt=require("bcryptjs")
 const jwt=require("jsonwebtoken");
 const { MongoClient } = require("mongodb");
+const {dbSvc} = require("../../services/db.service");
 
 class AuthController {
     register = async (req, res, next) => {
@@ -150,16 +151,35 @@ let response=await db.collection('users').insertOne(payload)
         try {
             let data  = req.body
             let token =req.params.token
-            let encPass=bcrypt.hashSync(data.password,10)
-            res.json({
-                result: {
-                    password:encPass
-                }
-            })
-        } catch(excecpt){
-            next(excecpt)
+            let userDetail= await authSvc.getuserByFilter({
+                token: token
+         
+    })
+    if(userDetail){
+
+        let encPass = bcrypt.hashSync(data.password, 10);
+
+        const updateData = {
+            password: encPass,
+            token: null, 
+            status: 'active'
         }
+
+        let updateResponse = await authSvc.updateUser({token:token}, updateData)
+
+        res.json({
+            result: updateResponse, 
+            message: "User Activated successfully",
+            meta: null
+        })
+
+    } else {
+        next({code: 400, message: "User does not exists/token expired/broken", result: data})
     }
+}catch(except){
+    next(except)
+}
+       }
 
         
         setLogin = (req, res, next) => {
