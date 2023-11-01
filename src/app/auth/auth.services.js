@@ -1,5 +1,8 @@
+
+const UserModel=require("../user/user.model")
+const PATModel = require("./personal-access-token.model")
 require("dotenv").config()
-class AuthService{
+class AuthService {
     registerEmailMessage(name,token){
         //todo:db table msg
         return `
@@ -19,6 +22,57 @@ class AuthService{
         </p>
         `
     }
+    registerUser = async (payload) => {
+        try {
+            let user=new UserModel(payload)
+            let response=await user.save();
+           // let response = await this.db.collection('users').insertOne(payload)
+            return response;
+        } catch(excpetion) {
+            throw excpetion
+        }
+    }
+
+    getuserByFilter = async(filter) => {
+        try {
+            let userDetail = await  UserModel.findOne(filter) 
+            return userDetail;
+        } catch(exception) {
+            throw exception;
+        }
+    }
+    storePAT=async(data)=>{
+        try{
+            let patObj =new PATModel(data)
+            return await patObj.save()
+        }catch(exception){
+            throw(exception)
+        }
+    }
+    getPatByToken=async(token)=>{
+        try{
+            let parData=await PATModel.findOne({
+                token:token
+            })
+            return parData;
+        }catch(exception){
+            throw exception
+        }
+    }
+
+    updateUser = async(filter, data) => {
+        try {
+            let response = await UserModel.updateOne(filter, {
+                $set: data
+            })
+            return response;
+        } catch(exception) {
+            throw exception;
+        }
+    }
 }
+
+
+
 const authSvc=new AuthService()
 module.exports=authSvc;

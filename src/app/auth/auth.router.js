@@ -1,26 +1,40 @@
-const router=require("express").Router()
-const authCtrl=require("./auth.controller")
-const uploader=require("../../middlewares/uploader.middleware")
-const ValidateRequest=require("../../middlewares/validate-request.middleware")
-const {registerSchema,passwordSchema,loginSchema} = require("./auth.validator")
+const router = require("express").Router()
+const authCtrl = require("./auth.controller")
+const uploader = require("../../middlewares/uploader.middleware");
+const ValidateRequest = require("../../middlewares/validate-request.middleware");
+const { registerSchema, passwordSchema, loginSchema } = require("./auth.validator");
+const CheckLogin = require("../../middlewares/auth.middleware");
+const CheckPermission = require("../../middlewares/rbac.middleware");
 
-const dirSetup=(req,res,next)=>{
-    req.uploadDir="./public/uploads/user";
+const dirSetup = (req, res, next) => {
+    req.uploadDir = "./public/uploads/users";
     next()
 }
-//Auth and Authorization route starts
-//uploade.none() has no parameter
-//uploader.single() is use to set only one image at one time
-//uploader.array() is use to select multiple image
-router.post('/register',dirSetup,uploader.single('image'),ValidateRequest(registerSchema),authCtrl.register)
-router.get('/verify-token/:token',authCtrl.verifyToken)
-router.post("/set-password/:token",ValidateRequest(passwordSchema),authCtrl.setPass)
 
-router.get("/refresh-token", (req, res, next) => {}, (req, res, next) => {})
-router.post("/login",ValidateRequest(loginSchema),authCtrl.setLogin)
+// Auth and Authorization routes start 
+router.post('/register',dirSetup, uploader.single('image'),ValidateRequest(registerSchema), authCtrl.register)
 
-router.get('/forget-password',authCtrl.forgetPswd)
-router.get('/me',authCtrl.checkMe,(req,res,next)=>{})
-router.post('logout',authCtrl.setLogout,(req,res,next)=>{})
+router.get('/verify-token/:token', authCtrl.verifyToken)
+router.post("/set-password/:token", ValidateRequest(passwordSchema), authCtrl.setpassWord)
 
-module.exports=router;
+router.post("/login",ValidateRequest(loginSchema), authCtrl.login)
+
+// loggedin All user roles
+router.get('/me', CheckLogin, authCtrl.getLoggedInUser)
+
+// Only Admin users
+router.get('/admin', CheckLogin,CheckPermission('admin'), (req, res, next) => {
+    res.send("I am admin role")
+})
+
+router.get("/admin-seller", CheckLogin,CheckPermission(['admin','seller']), (req, res, next) => {
+    res.send("I am called by admin or seller")    
+} )
+
+router.get("/refresh-token", CheckLogin,  (req, res, next) => {})
+
+router.get('/forget-password', (req, res, next) => {})
+// TODO: db data delete token
+router.post('/logout', CheckLogin,  authCtrl.logoutUser)
+
+module.exports = router;
