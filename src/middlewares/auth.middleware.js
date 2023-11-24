@@ -18,7 +18,7 @@ const CheckLogin = async (req, res, next) => {
                 next({code: 401, message: "Token required."})
             } else {
                 //TODO: Db exists exists
-                let patData =await authSvc.getPatData();
+                let patData =await authSvc.getPatByToken(token);
                 if(patData){
                     let data = jwt.verify(token, process.env.JWT_SECRET)
                     // let data  = jwt.decode(token)

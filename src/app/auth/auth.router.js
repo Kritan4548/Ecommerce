@@ -2,10 +2,10 @@ const router = require("express").Router()
 const authCtrl = require("./auth.controller")
 const uploader = require("../../middlewares/uploader.middleware");
 const ValidateRequest = require("../../middlewares/validate-request.middleware");
-const { registerSchema, passwordSchema, loginSchema } = require("./auth.validator");
+const { registerSchema, passwordSchema, loginSchema, emailValidatonSchema } = require("./auth.validator");
 const CheckLogin = require("../../middlewares/auth.middleware");
 const CheckPermission = require("../../middlewares/rbac.middleware");
-
+const {z}=require("zod")
 const dirSetup = (req, res, next) => {
     req.uploadDir = "./public/uploads/users";
     next()
@@ -22,18 +22,19 @@ router.post("/login",ValidateRequest(loginSchema), authCtrl.login)
 // loggedin All user roles
 router.get('/me', CheckLogin, authCtrl.getLoggedInUser)
 
-// Only Admin users
-router.get('/admin', CheckLogin,CheckPermission('admin'), (req, res, next) => {
-    res.send("I am admin role")
-})
 
-router.get("/admin-seller", CheckLogin,CheckPermission(['admin','seller']), (req, res, next) => {
-    res.send("I am called by admin or seller")    
-} )
+
 
 router.get("/refresh-token", CheckLogin,  (req, res, next) => {})
 
-router.get('/forget-password', (req, res, next) => {})
+//email addres receive as bbody,validate email
+// attach resetToken and ressetExpiry update user
+//email send ==>with resetToken=>
+//http://localhost:5173/set-password/resetToken
+router.post('/forget-password',ValidateRequest(emailValidatonSchema),authCtrl.forgetPassword)
+//{password:"",confirmPassword:""},token==>resetToken
+router.post('reset-password/:resetToken',ValidateRequest(passwordSchema),authCtrl.resetPassword)
+//{password:encPass,resetToken:null,resetExpiry:null}update
 // TODO: db data delete token
 router.post('/logout', CheckLogin,  authCtrl.logoutUser)
 

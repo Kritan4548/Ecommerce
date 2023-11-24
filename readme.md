@@ -88,5 +88,11 @@ to run mongoDb server
 mongosh
 
 
+1step ==>Email register user
+==>Verify email,verify user exist
+====>
+    resetToken:random string,
+    resetExpiry:Date
+
 
 

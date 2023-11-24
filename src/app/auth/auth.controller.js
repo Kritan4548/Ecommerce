@@ -8,7 +8,8 @@ const authSvc = require('./auth.services');
 const bcrypt = require('bcryptjs')
 const jwt = require("jsonwebtoken");
 const AuthRequest = require('./auth.request');
-const { getTokenFromHeader } = require('../../config/helpers');
+const { getTokenFromHeader, generateRandomString } = require('../../config/helpers');
+const UserModel=require('../user/user.model')
 
 class AuthController {
     register = async (req, res, next) => {
@@ -166,14 +167,90 @@ res.json({
     }
     logoutUser=async(req,res,next)=>{
         try{
-            let user=req.authUser
+            
             let token=getTokenFromHeader(req);
             let loggedout=await authSvc.deletePatData(token);
+console.log(token)
+            res.json({
+                result:null,
+                message:"Logged out successfully",
+                meta:null
+            })
         }catch(exception){
             next(exception)
         }
     }
+    forgetPassword=async (req,res,next)=>{
+        try{
+            email=req.body.email;
+            let userDetail=await authSvc.getuserByFilter({
+                email:email
+            })
+            if(userDetail.status==="active"){
+                let token=generateRandomString(100)
+                let expiry=Date.now()+86400000
+
+                let updateData={
+                    resetToken:token,
+                    resestExpiry:expiry
+                }
+                let status=await authSvc.updateUser({
+                    _id:userDetail._id
+                },updateData)
+                let message=await authSvc.forgetPasswordMessage(userDetail.name,token)
+                    await mailSvc.emailSend(userDetail.email,"Reset Password!!",message)
+                    res.json({
+                        result:null,
+                        message:"Check your email for further processing.",
+                        meta:null
+                    })
+                
+                
+            }else{
+                next({code:400,message:"User not activated"})
+            }
+
+        }catch(exception){
+            next(exception)
+        }
+    }
+    resetPassword = async(req, res, next) => {
+        try{
+            let payload = req.body; 
+            let token = req.params.resetToken
+            let userDetail = await authSvc.getuserByFilter({
+                resetToken: token
+            })
+            if(!userDetail) {
+                throw {code: 400, message: "Token not found"}
+            } else  {
+                // user Exists ; 
+                let todays = new Date()
+                if(todays > userDetail.resetExpiry){
+                    throw {code: 400, message: "Token Expired"}
+                } else {
+                    let updateData = {
+                        password: bcrypt.hashSync(payload.password, 10),
+                        resetExpiry: null, 
+                        resetToken: null
+                    }
+                    const updatedRes = await authSvc.updateUser({
+                        resetToken: token
+                    } , updateData)
+
+                    res.json({
+                        result: null, 
+                        message: "Your password has been changed successfully. Please login to continue",
+                        meta: null
+                    })
+                }
+            }
+        } catch(excecpt) {
+            next(excecpt)
+        }
+    }
 }
+
 
 
 const authCtrl = new AuthController()

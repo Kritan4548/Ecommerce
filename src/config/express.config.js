@@ -1,6 +1,9 @@
 const express = require("express")
 const app = express();
 require("./db.config")
+const cors=require("cors")
+
+app.use(cors())
 const router = require("../router/");
 const { MulterError } = require("multer");
 const { ZodError } = require("zod");
@@ -34,7 +37,9 @@ app.use(express.urlencoded({
 //CRUD
 //http://localhost:3005/api/v1/category
 //http://localhost:3005/api/v2/category
-
+app.use('/health',(req, res, next) => {
+    res.send("Success Ok");
+})
 
 
 

@@ -6,6 +6,9 @@ const registerSchema = z.object({
     status:z.string().regex(/active|inactive/).default('inactive')
 
 })
+const emailValidatonSchema = z.object({
+    email: z.string().email().min(1)
+});
 const passwordSchema = z.object({
     password: z.string().regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,20}$/),
     confirmPassword: z.string()
@@ -19,4 +22,4 @@ const loginSchema=z.object({
     password:z.string().min(8)
 })
 
-module.exports={registerSchema,passwordSchema,loginSchema};
+module.exports={registerSchema,passwordSchema,loginSchema,emailValidatonSchema};

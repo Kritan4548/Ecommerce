@@ -22,6 +22,25 @@ class AuthService {
         </p>
         `
     }
+    forgetPasswordMessage(name,token){
+        //todo:db table msg
+        return `
+        <b>Dear ${name}</b><br/>
+        <p>Please check the link below for resetting your password</p>
+        <a href="${process.env.FRONTEND_URL}/activate/${token}">
+        ${process.env.FRONTEND_URL}/activate/${token}
+        </a>
+        <br/>
+        <p>
+        <b>Regards</b>
+        </p>
+        <p>
+        <b>System Admin</b>
+        </p>
+        <em><small>please do not respond to this email</small></em>
+        </p>
+        `
+    }
     registerUser = async (payload) => {
         try {
             let user=new UserModel(payload)
@@ -57,6 +76,21 @@ class AuthService {
             return parData;
         }catch(exception){
             throw exception
+        }
+    }
+    deletePatData=async(token)=>{
+        try{
+            let deleted=await PATModel.findOneAndDelete({
+                token:token
+            })
+            if(deleted){
+                return deleted;
+            }else{
+                throw{code:404,message:"Token doesnot exist"}
+            }
+
+        }catch(excecpt){
+            throw(excecpt)
         }
     }
 
