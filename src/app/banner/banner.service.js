@@ -35,11 +35,11 @@ class BannerService{
             throw exception
         }
     }
-    listAllData=async(filter={},paging={offset:0,limit:15})=>{
+    listAllData=async(filter={},paging={offset:0,limit:15},options={sort:{_id:1}})=>{
         try{
             let list=await BannerModel.find(filter)
                         .populate('createdBy',['_id','name','email','role','image'])
-                        .sort({_id:1})
+                        .sort(options.sort)
                         .skip(paging.offset)
                         .limit(paging.limit)
         return list;
@@ -58,6 +58,42 @@ countData=async(filter={})=>{
 
 }
 }
+getById=async(filter)=>{
+    try{
+        let data=await BannerModel.findOne(filter)
+        .populate('createdBy',['_id','name','email','role','image'])
+        if(data){
+        return data;
+        }else{
+            throw{code:404,message:"Banner doesnot exist"}
+        }
+    }catch(exception){
+        console.log("getByIdSvc:",exception)
+        throw exception
+    }
 }
-const bannerSvc=new BannerService
+updateById=async(bannerId,payload)=>{
+    try{
+        let response=await BannerModel.findByIdAndUpdate(bannerId,{
+            $set:payload
+        })
+        return response
+    }catch(exception){
+        throw exception
+    }
+}
+deleteById=async(bannerId)=>{
+    try{
+        let response=await BannerModel.findByIdAndDelete(bannerId)
+        if(response){
+            return response
+        }else{
+            throw {code:404,message:"Banner already deleted or does not exists"}
+        }
+    }catch(exception){
+        throw exception;
+    }
+}
+}
+const bannerSvc=new BannerService()
 module.exports=bannerSvc

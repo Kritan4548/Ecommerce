@@ -48,11 +48,8 @@ app.use('/api/v1', router);
 
 //404 handle
 app.use((req, res, next) => {
-    res.status(404).json({
-        result: null,
-        message: "Not found",
-        meta: null
-    })
+    next({code:404,message:"Not found"})
+ 
 })
 
 
