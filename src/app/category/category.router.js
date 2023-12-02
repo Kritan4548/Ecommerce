@@ -1,20 +1,53 @@
-const router=require("express").Router()
+const CheckLogin = require('../../middlewares/auth.middleware');
+const CheckPermission = require('../../middlewares/rbac.middleware');
+const uploader = require('../../middlewares/uploader.middleware');
+const ValidateRequest = require('../../middlewares/validate-request.middleware');
+const { categoryRequestSchema } = require('./category.validator');
+const categoryCtrl=require('./category.controller');
+const checkAccess = require('../../middlewares/access-check.middleware');
+const categorySvc = require('./category.service');
+
+const router=require('express').Router()
+const dirSetup=(req,res,next)=>{
+    req.uploadDir="./public/uploads/category"
+    next()
+}
 
 router.route('/')
-.post ((req,res,next)=>{
-    res.json({
-        result:"Category post",
-        msg:"Sucess",
-        meta:null
-    })
-})
-.get((res,req,next)=>{})
-// router.post('/category',(req,res,next)=>{ })
-// router.get('/category',(req,res,next)=>{ })
+.get(
+    CheckLogin,
+    CheckPermission('admin'),
+    categoryCtrl.listAllCategory
+)
+.post(
+    CheckLogin,
+    CheckPermission('admin'),
+    dirSetup,
+    uploader.single('image'),
+    ValidateRequest(categoryRequestSchema),
+    categoryCtrl.createCategory)
 
 router.route('/:id')
-.get((req,res,next)=>{ })
-.put((req,res,next)=>{ })
-.delete((req,res,next)=>{ })
- 
+.get(
+    CheckLogin,
+    CheckPermission('admin'),
+    categoryCtrl.getById
+)
+.put(
+    CheckLogin,
+    CheckPermission('admin'),
+    checkAccess(categorySvc),
+    dirSetup,
+    uploader.single('image'),
+    ValidateRequest(categoryRequestSchema),
+    
+    categoryCtrl.updateById
+    )
+   .delete(
+    CheckLogin,
+    CheckPermission('admin'),
+    checkAccess(categorySvc),
+    categoryCtrl.deleteById
+   ) 
+
 module.exports=router;

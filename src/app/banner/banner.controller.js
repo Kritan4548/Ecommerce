@@ -77,13 +77,17 @@ class BannerController{
     updateById=async(req,res,next)=>{
         try{
             const bannerId=req.params.id;
-             await bannerSvc.getById({
+            const banner = await bannerSvc.getById({
                 _id:bannerId,
                 createdBy:req.authUser._id
             })
 
            const payload=bannerSvc.transformEditRequest(req);
-           const oldBanner=await bannerSvc.updateById(bannerId,payload);
+           let oldImage=payload.image;
+           if(!oldImage || oldImage=== ''){
+            oldImage=banner.image
+           }
+           const oldBanner=await bannerSvc.updateById(bannerId,{...payload,image:oldImage});
            if(payload.image){
             deleteFile("./public/uploads/banner/",oldBanner.image)
             

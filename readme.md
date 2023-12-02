@@ -94,5 +94,21 @@ mongosh
     resetToken:random string,
     resetExpiry:Date
 
+    Category
+        name/title
+        description
+        parentId--->Foreign Key
+            ref-self
+            parentId:{
+                type:mongoose.Types.ObjectId,
+                ref:'Category',
+                nullble:true
+            }
+        status
+        image
+        createdBy
+
+        
+
 
 

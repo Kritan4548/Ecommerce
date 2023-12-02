@@ -26,7 +26,7 @@ const getTokenFromHeader=(req)=>{
     return token;
 }
 deleteFile=(path,filename)=>{
-    if(fs.existsSync(path+filename)){
+    if(filename && fs.existsSync(path+filename)){
         fs.unlinkSync(path+filename)
     }
 }
