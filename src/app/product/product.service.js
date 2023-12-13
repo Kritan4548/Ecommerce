@@ -1,16 +1,31 @@
 const slugify= require("slugify");
-const CategoryModel = require("./category.module");
+const ProductModel = require("./product.model");
+const { generateRandomNumber } = require("../../config/helpers");
 
-class CategoryService{
+class ProductService{
     create=async (payload)=>{
         try{
-            let category=new CategoryModel(payload)
-            return await category.save()
+            let product=new ProductModel(payload)
+            return await product.save()
         }catch(exception){
             if(exception.code===11000){
-                exception={code:400,message:"Category name should be unique"}
+                exception={code:400,message:"Product name should be unique"}
             }
             throw exception
+        }
+    }
+    checkSlug=async(slug)=>{
+        try{
+            let data=await ProductModel.countDocuments({slug:slug})
+            if(count>0){
+                let random=generateRandomNumber(1000)
+                slug=slug+"-"+random;
+               return await this.checkSlug(slug)
+            }else{
+                return slug
+            }
+        }catch(exception){
+            throw exception;
         }
     }
     getFilter=(query,user)=>{
@@ -19,6 +34,7 @@ class CategoryService{
             filter={
                 $or:[
                     {title:new RegExp(query.search,'i')},
+                    {summary:new RegExp(query.search,'i')},
                     {description:new RegExp(query.search,'i')}
                 ]
             }
@@ -45,19 +61,21 @@ class CategoryService{
     }
    countData=async(filter)=>{
     try{
-        let count= await CategoryModel.count(filter)
+        let count= await ProductModel.count(filter)
         return count;
     }catch(exception){
         throw exception
     }
 
    }
-   getData=async(filter,{limit=15,skip=0})=>{
+   getData=async(filter,{limit=15,skip=0},sort={_id:"DESC",title:"asc"})=>{
     try{
-        let data=await CategoryModel.find(filter)
-            .populate("parentId",['_id','title','slug','status'])
+        let data=await ProductModel.find(filter)
+            .populate("category",['_id','title','slug','status'])
+            .populate("brand",['_id','title','slug','status'])
+            .populate("seller",['_id','name'])
             .populate("createdBy",['_id','name'])
-            .sort({_id:"DESC"})
+            .sort(sort)
             .skip(skip)
             .limit(limit)
             return data;
@@ -116,9 +134,9 @@ class CategoryService{
               }
             }
           ]
-        let data = await CategoryModel.aggregate(pipeline)
+        let data = await ProductModel.aggregate(pipeline)
         if(!data) {
-            throw {code: 404, message: "Category Does not exists"}
+            throw {code: 404, message: "Product Does not exists"}
         }
         return data;
 
@@ -128,9 +146,11 @@ class CategoryService{
    }
    getById=async(filter)=>{
     try{
-        let data=await CategoryModel.findOne(filter)
-            .populate("parentId",['_id','title','slug','status'])
-            .populate("createdBy",['_id','name'])
+        let data=await ProductModel.findOne(filter)
+        .populate("category",['_id','title','slug','status'])
+        .populate("brand",['_id','title','slug','status'])
+        .populate("seller",['_id','name'])
+        .populate("createdBy",['_id','name'])
         return data;
     }catch(exception){
         throw exception
@@ -138,7 +158,7 @@ class CategoryService{
    }
    updateById=async(id,data)=>{
     try{
-        const update=await CategoryModel.findByIdAndUpdate(id,{$set:data});
+        const update=await ProductModel.findByIdAndUpdate(id,{$set:data});
         return update
     }catch(exception){
         throw exception
@@ -146,9 +166,9 @@ class CategoryService{
    }
    deleteById=async(id)=>{
     try{
-        let deleted=await CategoryModel.findByIdAndDelete(id)
+        let deleted=await ProductModel.findByIdAndDelete(id)
         if(!deleted){
-            throw {code:404,message:"Category does not exists"}
+            throw {code:404,message:"Product does not exists"}
         }
         return deleted
     }catch(exception){
@@ -157,5 +177,5 @@ class CategoryService{
    }
 }
 
-const categorySvc=new CategoryService()
-module.exports=categorySvc
+const productSvc=new ProductService()
+module.exports=productSvc

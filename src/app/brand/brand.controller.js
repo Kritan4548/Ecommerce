@@ -1,6 +1,7 @@
 const { deleteFile } = require("../../config/helpers")
 const brandSvc=require("../brand/brand.service")
 const fs=require('fs')
+const productSvc = require("../product/product.service")
 class BrandController{
     brandCreate=async (req,res,next)=>{
         try{
@@ -171,13 +172,26 @@ getDetailBySlug=async (req,res,next)=>{
             status:"active"
         })
         //TODO:PRODUCT LIST
+        let filter={
+            brand:brandDetail._id,
+            status:"active"
+        }
+        const total=await productSvc.countData(filter)
+        const limit=+req.query.limit || 10;
+        const page=+req.query.page ||1;
+        const skip=(page-1)*limit
+        const products=await productSvc.getData(filter,{limit,skip})
         res.json({
             result:{
             detail:brandDetail,
-            products:null
+            products:products
             },
             message:"Brand Detail from Slug",
-            meta:null
+            meta:{
+                total:total,
+                page:page,
+                limit:limit
+            }
         })
     }catch(exception){
         next(exception)

@@ -4,10 +4,14 @@ let chars="0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 let lengths=chars.length;
 let random="";
 for(let i=1;i<=len;i++){
-    let posn=Math.ceil(Math.random()*(lengths-1))
+    let posn=generateRandomNumber(lengths-1)
     random+=chars[posn]
 }
 return random
+}
+const generateRandomNumber=(limit,lower=0)=>{
+    let posn=Math.ceil(lower + (Math.random()*limit));
+    return posn
 }
 const getTokenFromHeader=(req)=>{
     let token = null;
@@ -30,4 +34,4 @@ deleteFile=(path,filename)=>{
         fs.unlinkSync(path+filename)
     }
 }
-module.exports={generateRandomString,getTokenFromHeader,deleteFile}
+module.exports={generateRandomString,getTokenFromHeader,deleteFile,generateRandomNumber}

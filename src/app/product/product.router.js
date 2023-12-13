@@ -2,53 +2,53 @@ const CheckLogin = require('../../middlewares/auth.middleware');
 const CheckPermission = require('../../middlewares/rbac.middleware');
 const uploader = require('../../middlewares/uploader.middleware');
 const ValidateRequest = require('../../middlewares/validate-request.middleware');
-const { categoryRequestSchema } = require('./category.validator');
-const categoryCtrl=require('./category.controller');
+const { productRequestSchema } = require('./product.validator');
+const productCtrl=require('./product.controller');
 const checkAccess = require('../../middlewares/access-check.middleware');
-const categorySvc = require('./category.service');
+const productSvc = require('./product.service');
 
 const router=require('express').Router()
 const dirSetup=(req,res,next)=>{
-    req.uploadDir="./public/uploads/category"
+    req.uploadDir="./public/uploads/product"
     next()
 }
-router.get('/home',categoryCtrl.listForHome)
-router.get('/:slug/slug',categoryCtrl.getBySlug)
+router.get('/home',productCtrl.listForHome)
+router.get('/:slug/slug',productCtrl.getBySlug)
 router.route('/')
 .get(
     CheckLogin,
     CheckPermission('admin'),
-    categoryCtrl.listAllCategory
+    productCtrl.listAllProduct
 )
 .post(
     CheckLogin,
     CheckPermission('admin'),
     dirSetup,
-    uploader.single('image'),
-    ValidateRequest(categoryRequestSchema),
-    categoryCtrl.createCategory)
+    uploader.array('images'),
+    ValidateRequest(productRequestSchema),
+    productCtrl.createProduct)
 
 router.route('/:id')
 .get(
     CheckLogin,
     CheckPermission('admin'),
-    categoryCtrl.getById
+    productCtrl.getById
 )
 .put(
     CheckLogin,
     CheckPermission('admin'),
-    checkAccess(categorySvc),
+    checkAccess(productSvc),
     dirSetup,
-    uploader.single('image'),
-    ValidateRequest(categoryRequestSchema),
+    uploader.array('images'),
+    ValidateRequest(productRequestSchema),
     
-    categoryCtrl.updateById
+    productCtrl.updateById
     )
    .delete(
     CheckLogin,
     CheckPermission('admin'),
-    checkAccess(categorySvc),
-    categoryCtrl.deleteById
+    checkAccess(productSvc),
+    productCtrl.deleteById
    ) 
 
 module.exports=router;

@@ -1,13 +1,20 @@
 const express = require("express")
+
 const app = express();
 require("./db.config")
 const cors=require("cors")
+const event=require("./event.config")
+
+
+
 
 app.use(cors())
 const router = require("../router/");
 const { MulterError } = require("multer");
 const { ZodError } = require("zod");
 const { MongooseError } = require("mongoose");
+const { GraphQLSchema, GraphQLObjectType, GraphQLString } = require("graphql");
+const { createHandler } = require("graphql-http/lib/use/express");
 
 
 //body parser
@@ -38,13 +45,31 @@ app.use(express.urlencoded({
 //http://localhost:3005/api/v1/category
 //http://localhost:3005/api/v2/category
 app.use('/health',(req, res, next) => {
+  
+
     res.send("Success Ok");
 })
 
 
-
+app.use(event)
 app.use('/api/v1', router);
 //app.use('/api/v2',router);
+
+const querySchmea= new GraphQLSchema({
+    query:new GraphQLObjectType({
+        name:"RootQuery",
+        fields:{
+            hello:{
+                type:GraphQLString,
+                resolve:()=>{
+                    return "Hello World"
+                }
+            }
+        }
+    })})
+    app.use("/api/v1/graphql",createHandler({
+        schema:querySchmea
+    }))
 
 //404 handle
 app.use((req, res, next) => {
