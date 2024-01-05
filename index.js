@@ -14,9 +14,9 @@ io.emit("event",{})
 io.on("connection",(socket)=>{
     //socket
 })
-server.listen('3005','localhost',(err)=>{
+server.listen(process.env.PORT || 80,(err)=>{
     if(!err){
-        console.log("Server is runnning on port 3005")
+        console.log("Server is runnning on port 443/80")
         console.log("Press CTRL+C to disconnect your server")
         console.log("User http://localhost:3005/ to browse your server")
     }

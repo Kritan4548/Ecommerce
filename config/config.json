@@ -1,0 +1,26 @@
+{
+    "development":{
+        "username":"postgres",
+        "password":"kritan2058",
+        "database":"mern-25",
+        "host":"127.0.0.1",
+        "port":"",
+        "dialect":"postgres"
+    },
+    "test":{
+        "username":"postgres",
+        "password":"kritan2058",
+        "database":"mern-25",
+        "host":"127.0.0.1",
+        "port":"",
+        "dialect":"postgres"
+    },
+    "production":{
+        "username":"postgres",
+        "password":"kritan2058",
+        "database":"mern-25",
+        "host":"127.0.0.1",
+        "port":"",
+        "dialect":"postgres"
+    }
+}
