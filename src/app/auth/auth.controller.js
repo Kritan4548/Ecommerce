@@ -141,7 +141,12 @@ res.json({
     result:{
         token:token,
         refreshToken:refreshToken,
-        type:"Bearer"
+        type:"Bearer",
+        userDetail:{
+            userId:userDetail._id,
+            name:userDetail.name,
+            role:userDetail.role
+        }
     }
 })
 }else{

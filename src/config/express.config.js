@@ -2,7 +2,7 @@ const express = require("express")
 
 const app = express();
 require("./db.config")
-require("./sequelize.config")
+//require("./sequelize.config")
 const cors=require("cors")
 const event=require("./event.config")
 
